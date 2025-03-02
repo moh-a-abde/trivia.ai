@@ -1,0 +1,6 @@
+Messi,95
+Ronaldo,90
+Neymar,85
+Mbappe,80
+Haaland,75
+Mohamed Ayman Abdel-Hamid,1
