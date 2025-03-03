@@ -3,6 +3,3 @@ LeBron,90
 Kobe,85
 Steph,80
 Durant,75
-Mohamed Ayman Abdel-Hamid,3
-Mohamed Abdel Hamid,0
-Mohamed Abdel Hamid,0
