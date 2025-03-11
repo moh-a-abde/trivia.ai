@@ -11,7 +11,7 @@ Sing In/Sign Up
 ![Screenshot 11](demo/signup.png)
 ---
 Loading Animation
-tab
+card
 
 ![Screenshot 7](demo/loading.png)
 ---
