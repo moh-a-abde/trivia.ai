@@ -48,9 +48,15 @@ const Home: React.FC<HomeProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
   
   const currentUser = session?.user || user;
   const isUserAuthenticated = !!session || isAuthenticated;
+
+  // Detect touch device
+  useEffect(() => {
+    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -65,16 +71,53 @@ const Home: React.FC<HomeProps> = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showProfile]);
-
-  // Hide tooltip after 5 seconds
+  
+  // Hide tooltip after 8 seconds
   useEffect(() => {
+    // Don't set a timer if tooltip is already hidden by user preference
+    const tooltipHidden = localStorage.getItem('sportTooltipHidden') === 'true';
+    if (tooltipHidden) return;
+    
     const timer = setTimeout(() => {
       setShowSportTooltip(false);
-    }, 5000);
+    }, 8000);
     
     return () => clearTimeout(timer);
   }, []);
+
+  // Show tooltip briefly for touch devices after page load
+  useEffect(() => {
+    // Don't show on touch devices if user has chosen to hide tooltip
+    const tooltipHidden = localStorage.getItem('sportTooltipHidden') === 'true';
+    if (tooltipHidden || !isTouchDevice) return;
+    
+    // Show tooltip after a short delay to get user's attention
+    const touchTimer = setTimeout(() => {
+      setShowSportTooltip(true);
+      
+      // Hide tooltip after a while
+      setTimeout(() => {
+        setShowSportTooltip(false);
+      }, 4000);
+    }, 1500);
+    
+    return () => clearTimeout(touchTimer);
+  }, [isTouchDevice]);
   
+  // Check if tooltip should be hidden from localStorage
+  useEffect(() => {
+    const tooltipHidden = localStorage.getItem('sportTooltipHidden') === 'true';
+    if (tooltipHidden) {
+      setShowSportTooltip(false);
+    }
+  }, []);
+  
+  // Function to permanently hide tooltip
+  const hideSportTooltipPermanently = () => {
+    localStorage.setItem('sportTooltipHidden', 'true');
+    setShowSportTooltip(false);
+  };
+
   useEffect(() => {
     const fetchScores = async () => {
       try {
@@ -234,10 +277,33 @@ const Home: React.FC<HomeProps> = ({
         >
           <div className="relative">
             <div 
-              onClick={() => setShowSportDropdown(!showSportDropdown)}
+              onClick={() => {
+                setShowSportDropdown(!showSportDropdown);
+                // On touch devices, briefly show the tooltip when clicking the element if dropdown isn't open
+                const tooltipHidden = localStorage.getItem('sportTooltipHidden') === 'true';
+                if (!tooltipHidden && isTouchDevice && showSportDropdown === false) {
+                  setShowSportTooltip(true);
+                  setTimeout(() => setShowSportTooltip(false), 3000);
+                }
+              }}
               className="cursor-pointer relative flex items-center"
-              onMouseEnter={() => setShowSportTooltip(true)}
-              onMouseLeave={() => setTimeout(() => setShowSportTooltip(false), 1000)}
+              onMouseEnter={() => {
+                const tooltipHidden = localStorage.getItem('sportTooltipHidden') === 'true';
+                if (!tooltipHidden && !showSportDropdown) {
+                  setShowSportTooltip(true);
+                }
+              }}
+              onMouseLeave={() => {
+                setTimeout(() => setShowSportTooltip(false), 1500);
+              }}
+              aria-label={`Change sport. Currently selected: ${selectedSport}`}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  setShowSportDropdown(!showSportDropdown);
+                }
+              }}
             >
               <div className="relative">
                 {selectedSport === 'basketball' ? (
@@ -257,49 +323,112 @@ const Home: React.FC<HomeProps> = ({
             </div>
             
             {/* Sport Selection Tooltip */}
-            {showSportTooltip && !showSportDropdown && (
-              <div className="absolute top-full left-0 mt-2 bg-gray-800 p-2 rounded-lg shadow-lg text-sm z-50 w-48 animate-fade-in">
-                <div className="flex items-start">
-                  <FaInfoCircle className="text-blue-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <p className="text-white">Click the ball to change sport</p>
-                </div>
-              </div>
-            )}
+            <AnimatePresence>
+              {showSportTooltip && !showSportDropdown && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -5, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -5, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute top-full left-0 mt-2 z-50 w-64 overflow-hidden"
+                >
+                  <div className="relative">
+                    {/* Decorative arrow pointing to the ball */}
+                    <div className="absolute top-0 left-6 w-3 h-3 bg-gradient-to-br from-blue-500 to-blue-600 transform rotate-45 -translate-y-1.5 z-10"></div>
+                    
+                    {/* Main tooltip body */}
+                    <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg overflow-hidden border border-blue-300 dark:border-blue-700">
+                      <div className="px-4 py-3 relative overflow-hidden">
+                        {/* Background pattern */}
+                        <div 
+                          className="absolute inset-0 opacity-10"
+                          style={{
+                            backgroundImage: 'url("data:image/svg+xml,%3Csvg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="%23ffffff" fill-opacity="1" fill-rule="evenodd"%3E%3Ccircle cx="3" cy="3" r="3"/%3E%3Ccircle cx="13" cy="13" r="3"/%3E%3C/g%3E%3C/svg%3E")',
+                            backgroundSize: '12px 12px'
+                          }}
+                        />
+                        
+                        {/* Dismiss button */}
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent opening dropdown when clicking dismiss
+                            setShowSportTooltip(false);
+                          }}
+                          className="absolute top-2 right-2 text-white opacity-70 hover:opacity-100 focus:outline-none focus:ring-1 focus:ring-white rounded-full p-1"
+                          aria-label="Dismiss tooltip"
+                        >
+                          <FaTimes size={14} />
+                        </button>
+                        
+                        <div className="flex items-start space-x-3">
+                          <div className="mt-0.5 bg-white bg-opacity-20 p-1.5 rounded-full flex-shrink-0">
+                            <FaInfoCircle className="text-white text-lg" />
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-white text-sm uppercase tracking-wide mb-1">Pro Tip</h4>
+                            <p className="text-white text-sm font-medium">Click the ball icon to switch between <span className="font-bold underline">Basketball</span> and <span className="font-bold underline">Soccer</span> trivia!</p>
+                          </div>
+                        </div>
+                        
+                        {/* Don't show again option */}
+                        <div className="mt-3 pt-2 border-t border-white border-opacity-20 flex justify-end">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              hideSportTooltipPermanently();
+                            }}
+                            className="text-xs text-white text-opacity-80 hover:text-opacity-100 transition-opacity duration-200 focus:outline-none focus:ring-1 focus:ring-white rounded px-2 py-1"
+                          >
+                            Don't show again
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
             
             {/* Sport Selection Dropdown */}
             {showSportDropdown && (
-              <div className="absolute top-full left-0 mt-2 bg-gray-800 rounded-lg shadow-lg z-50 w-48 animate-fade-in">
-                <div className="p-2 border-b border-gray-700">
-                  <p className="text-sm text-white">Select Sport</p>
+              <div className="absolute top-full left-0 mt-3 bg-white dark:bg-gray-800 rounded-xl shadow-xl z-50 w-56 animate-slide-in overflow-hidden border border-gray-100 dark:border-gray-700 transform transition-all duration-200">
+                <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+                  <p className="text-sm font-semibold text-gray-800 dark:text-white">Select Sport</p>
                 </div>
-                <div className="flex space-x-2">
+                <div className="p-2">
                   <button
                     onClick={() => handleSportChange('basketball')}
-                    className={`px-4 py-2 text-sm font-medium rounded-l-lg ${
+                    className={`w-full mb-2 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 flex items-center ${
                       selectedSport === 'basketball'
                         ? darkMode
-                          ? 'bg-orange-600 text-white'
-                          : 'bg-orange-500 text-white'
+                          ? 'bg-orange-600 text-white shadow-md'
+                          : 'bg-orange-500 text-white shadow-md'
                         : darkMode
                         ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                        : 'bg-white text-gray-700 hover:bg-gray-100'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
-                    <FaBasketballBall className="inline-block mr-2" /> Basketball
+                    <div className="bg-gray-200 dark:bg-gray-600 p-2 rounded-full mr-3">
+                      <FaBasketballBall className={`${selectedSport === 'basketball' ? 'text-orange-500' : 'text-gray-500'}`} />
+                    </div>
+                    <span>Basketball</span>
                   </button>
                   <button
                     onClick={() => handleSportChange('soccer')}
-                    className={`px-4 py-2 text-sm font-medium rounded-r-lg ${
+                    className={`w-full px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 flex items-center ${
                       selectedSport === 'soccer'
                         ? darkMode
-                          ? 'bg-green-600 text-white'
-                          : 'bg-green-500 text-white'
+                          ? 'bg-green-600 text-white shadow-md'
+                          : 'bg-green-500 text-white shadow-md'
                         : darkMode
                         ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                        : 'bg-white text-gray-700 hover:bg-gray-100'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
-                    <FaFutbol className="inline-block mr-2" /> Soccer
+                    <div className="bg-gray-200 dark:bg-gray-600 p-2 rounded-full mr-3">
+                      <FaFutbol className={`${selectedSport === 'soccer' ? 'text-green-500' : 'text-gray-500'}`} />
+                    </div>
+                    <span>Soccer</span>
                   </button>
                 </div>
               </div>
@@ -556,7 +685,7 @@ const Home: React.FC<HomeProps> = ({
       </AnimatePresence>
 
       {/* Hero Section */}
-      <div className={`py-16 px-4 transition-colors duration-300 ${darkMode ? 'bg-gradient-to-b ' + colors.gradientDark : 'bg-gradient-to-b ' + colors.gradient}`}>
+      <div className={`py-20 px-4 transition-colors duration-500 ${darkMode ? 'bg-gradient-to-b ' + colors.gradientDark : 'bg-gradient-to-b ' + colors.gradient}`}>
         <div className="max-w-4xl mx-auto text-center">
           {currentUser ? (
             <>
@@ -568,193 +697,197 @@ const Home: React.FC<HomeProps> = ({
                 </div>
               </div>
               <h1 
-                className="text-4xl md:text-5xl font-bold mb-4"
+                className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight"
               >
-                Welcome back, <span className={colors.accent}>{currentUser.name || currentUser.displayName || 'User'}</span>!
+                Welcome back, <span className={`${colors.accent} font-extrabold`}>{currentUser.name || currentUser.displayName || 'User'}</span>!
               </h1>
             </>
           ) : (
             <h1 
-              className="text-4xl md:text-5xl font-bold mb-4"
+              className="text-4xl md:text-5xl lg:text-6xl tracking-tight mb-8"
             >
-              Test Your <span className={colors.accent}>{selectedSport === 'basketball' ? 'Basketball' : 'Soccer'}</span> Knowledge
+              <span className="font-light block sm:inline">Test Your</span> <span className={`${colors.accent} font-extrabold`}>{selectedSport === 'basketball' ? 'Basketball' : 'Soccer'}</span> <span className="font-semibold">Knowledge</span>
             </h1>
           )}
           
           <p 
-            className={`text-xl mb-8 transition-colors duration-300 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}
+            className={`text-xl md:text-2xl mb-10 max-w-2xl mx-auto leading-relaxed tracking-wide transition-colors duration-300 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}
           >
             Challenge yourself with our AI-powered {selectedSport} trivia questions and see how you rank!
           </p>
           
           {!currentUser && (
-            <p className={`text-md mb-6 transition-colors duration-300 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p className={`text-md mb-8 transition-colors duration-300 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
               No account needed - play as a guest or sign in to save your progress!
             </p>
           )}
           
-          <button
+          <motion.button
             onClick={onStart}
-            className={`px-8 py-4 rounded-lg text-xl font-bold transition-colors duration-300 flex items-center justify-center mx-auto ${
+            className={`px-10 py-5 rounded-xl text-xl font-bold shadow-lg transition-all duration-300 flex items-center justify-center mx-auto hover:shadow-xl ${
               darkMode
-                ? colors.buttonDark + ' text-white'
-                : colors.button + ' text-white'
+                ? `${colors.buttonDark} hover:translate-y-[-2px] text-white`
+                : `${colors.button} hover:translate-y-[-2px] text-white`
             }`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.98 }}
+            aria-label="Start the quiz"
           >
-            Start Quiz <FaArrowRight className="ml-2" />
-          </button>
-        </div>
-      </div>
-
-      {/* Features Section */}
-      <div className={`py-16 px-4 transition-colors duration-300 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-        <div className="max-w-4xl mx-auto">
-          <h2 
-            className="text-3xl font-bold mb-12 text-center"
-          >
-            Why Play <span className={colors.accent}>Trivia.AI</span>?
-          </h2>
+            Start Quiz <FaArrowRight className="ml-3" />
+          </motion.button>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: selectedSport === 'basketball' ? (
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center mx-auto">
-                    <FaBasketballBall className="text-white text-3xl animate-spin-slow" />
-                  </div>
-                ) : (
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center mx-auto">
-                    <FaFutbol className="text-white text-3xl animate-spin-slow" />
-                  </div>
-                ),
-                title: selectedSport === 'basketball' ? "Basketball Trivia" : "Soccer Trivia",
-                description: `Test your knowledge on ${selectedSport} with challenging questions for all levels.`
-              },
-              {
-                icon: <FaTrophy className="text-4xl text-yellow-500" />,
-                title: "Earn Achievements",
-                description: "Unlock special achievements as you improve your trivia skills and knowledge."
-              },
-              {
-                icon: <FaChartLine className="text-4xl text-blue-500" />,
-                title: "Track Progress",
-                description: "See your improvement over time with detailed stats and personalized insights."
+          <motion.button
+            onClick={() => {
+              const leaderboardSection = document.getElementById('leaderboard-section');
+              if (leaderboardSection) {
+                leaderboardSection.scrollIntoView({ behavior: 'smooth' });
               }
-            ].map((feature, index) => (
-              <div
-                key={index}
-                className={`p-6 rounded-lg transition-colors duration-300 ${darkMode ? 'bg-gray-700' : selectedSport === 'basketball' ? 'bg-orange-50' : 'bg-green-50'}`}
-              >
-                <div className="mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                <p className={`transition-colors duration-300 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  {feature.description}
-                </p>
-              </div>
-            ))}
-          </div>
+            }}
+            className={`mt-5 px-6 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center justify-center mx-auto ${
+              darkMode
+                ? 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-200'
+            }`}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            aria-label="View the leaderboard"
+          >
+            View Leaderboard <FaTrophy className="ml-2 text-yellow-500" />
+          </motion.button>
         </div>
       </div>
 
       {/* Leaderboard Section */}
-      <div className={`py-16 px-4 transition-colors duration-300 ${darkMode ? 'bg-gray-900' : selectedSport === 'basketball' ? 'bg-orange-100' : 'bg-green-100'}`}>
+      <div id="leaderboard-section" className={`py-20 px-4 transition-colors duration-300 ${darkMode ? 'bg-gray-900' : selectedSport === 'basketball' ? 'bg-orange-50' : 'bg-green-50'}`}>
         <div className="max-w-4xl mx-auto">
-          <h2 
-            className="text-3xl font-bold mb-2 text-center"
-          >
-            <FaTrophy className="inline-block text-yellow-500 mr-2" /> Leaderboard
-          </h2>
+          <div className="text-center mb-10">
+            <span className="inline-block animate-bounce-slight">
+              <FaTrophy className="inline-block text-yellow-500 text-4xl mb-4" />
+            </span>
+            <h2 
+              className="text-3xl md:text-4xl font-bold tracking-tight"
+            >
+              Leaderboard
+            </h2>
+            <p className={`mt-2 text-lg ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>See how you stack up against other players</p>
+          </div>
           
-          <div className="flex justify-center mb-6">
-            <div className={`inline-flex rounded-md shadow-sm`}>
+          <div className="flex justify-center mb-8">
+            <div className={`inline-flex rounded-md shadow-md overflow-hidden`}>
               <button
                 onClick={() => handleSportChange('basketball')}
-                className={`px-4 py-2 text-sm font-medium rounded-l-lg ${
+                className={`px-6 py-3 text-sm font-medium rounded-l-lg transition-all duration-300 ${
                   selectedSport === 'basketball'
                     ? darkMode
-                      ? 'bg-orange-600 text-white'
-                      : 'bg-orange-500 text-white'
+                      ? 'bg-orange-600 text-white shadow-inner'
+                      : 'bg-orange-500 text-white shadow-inner'
                     : darkMode
                     ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
+                aria-label="Show Basketball leaderboard"
               >
                 <FaBasketballBall className="inline-block mr-2" /> Basketball
               </button>
               <button
                 onClick={() => handleSportChange('soccer')}
-                className={`px-4 py-2 text-sm font-medium rounded-r-lg ${
+                className={`px-6 py-3 text-sm font-medium rounded-r-lg transition-all duration-300 ${
                   selectedSport === 'soccer'
                     ? darkMode
-                      ? 'bg-green-600 text-white'
-                      : 'bg-green-500 text-white'
+                      ? 'bg-green-600 text-white shadow-inner'
+                      : 'bg-green-500 text-white shadow-inner'
                     : darkMode
                     ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
+                aria-label="Show Soccer leaderboard"
               >
                 <FaFutbol className="inline-block mr-2" /> Soccer
               </button>
             </div>
           </div>
           
-          {leaderboard.length > 0 ? (
-            <div 
-              className={`rounded-lg overflow-hidden shadow-lg transition-colors duration-300 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}
-            >
-              <table className="w-full">
-                <thead className={`transition-colors duration-300 ${darkMode ? 'bg-gray-700 text-white' : selectedSport === 'basketball' ? 'bg-orange-500 text-white' : 'bg-green-500 text-white'}`}>
-                  <tr>
-                    <th className="py-3 px-4 text-left">Rank</th>
-                    <th className="py-3 px-4 text-left">Player</th>
-                    <th className="py-3 px-4 text-right">Score</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {leaderboard.slice(0, 10).map((entry, index) => (
-                    <tr 
+          <div 
+            className={`rounded-xl overflow-hidden transition-all duration-300 shadow-lg ${
+              darkMode ? 'bg-gray-800' : 'bg-white'
+            }`}
+          >
+            <div className={`p-4 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+              <div className="grid grid-cols-12 gap-4 text-sm font-semibold">
+                <div className="col-span-2 text-center">Rank</div>
+                <div className="col-span-6">Player</div>
+                <div className="col-span-4 text-right">Score</div>
+              </div>
+            </div>
+            
+            <div className="max-h-96 overflow-y-auto">
+              {leaderboard.length === 0 ? (
+                <div 
+                  className={`p-8 text-center ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}
+                >
+                  No scores yet. Be the first to play!
+                </div>
+              ) : (
+                leaderboard.map((entry, index) => {
+                  // Get user status
+                  const isCurrentUser = currentUser && 
+                    (currentUser.name === entry.username || currentUser.displayName === entry.username);
+                  
+                  // Get Medal icons based on rank
+                  const getRankIcon = (position: number) => {
+                    if (position === 0) return <FaTrophy className="text-yellow-500" />;
+                    if (position === 1) return <FaMedal className="text-gray-400" />;
+                    if (position === 2) return <FaMedal className="text-amber-700" />;
+                    return null;
+                  };
+                  
+                  return (
+                    <motion.div 
                       key={index}
-                      className={`transition-colors duration-300 ${
-                        currentUser && (currentUser.name === entry.username || currentUser.displayName === entry.username)
-                          ? darkMode 
-                            ? selectedSport === 'basketball' ? 'bg-orange-900/30' : 'bg-green-900/30' 
-                            : selectedSport === 'basketball' ? 'bg-orange-100' : 'bg-green-100'
-                          : index % 2 === 0
-                          ? darkMode ? 'bg-gray-800' : 'bg-white'
-                          : darkMode ? 'bg-gray-750' : 'bg-gray-50'
-                      }`}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05, duration: 0.3 }}
+                      className={`grid grid-cols-12 gap-4 p-4 ${
+                        index % 2 === 0 
+                          ? darkMode ? 'bg-gray-750' : 'bg-gray-50' 
+                          : ''
+                      } ${
+                        isCurrentUser
+                          ? darkMode
+                            ? selectedSport === 'basketball' ? 'bg-orange-900/20 border-l-4 border-orange-500' : 'bg-green-900/20 border-l-4 border-green-500'
+                            : selectedSport === 'basketball' ? 'bg-orange-100 border-l-4 border-orange-500' : 'bg-green-100 border-l-4 border-green-500'
+                          : ''
+                      } transition-all duration-200 hover:${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}
                     >
-                      <td className="py-3 px-4">
-                        {index === 0 ? (
-                          <span className="text-yellow-500 font-bold">🥇 1st</span>
-                        ) : index === 1 ? (
-                          <span className="text-gray-400 font-bold">🥈 2nd</span>
-                        ) : index === 2 ? (
-                          <span className="text-amber-600 font-bold">🥉 3rd</span>
+                      <div className="col-span-2 flex justify-center items-center">
+                        {getRankIcon(index) ? (
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center">
+                            {getRankIcon(index)}
+                          </div>
                         ) : (
-                          `${index + 1}th`
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
+                            darkMode ? 'bg-gray-700' : 'bg-gray-200'
+                          }`}>
+                            {index + 1}
+                          </div>
                         )}
-                      </td>
-                      <td className="py-3 px-4 font-medium">
-                        {currentUser && (currentUser.name === entry.username || currentUser.displayName === entry.username) ? (
-                          <span className={`font-bold ${colors.accent}`}>{entry.username} (You)</span>
-                        ) : (
-                          entry.username
-                        )}
-                      </td>
-                      <td className="py-3 px-4 text-right font-bold">{entry.score}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </div>
+                      <div className="col-span-6 flex items-center">
+                        <div className={`flex items-center font-medium ${isCurrentUser ? `${colors.accent} font-bold` : ''}`}>
+                          <FaUserCircle className="mr-2 text-gray-500" /> 
+                          {entry.username}
+                          {isCurrentUser && <span className="ml-2 text-xs text-gray-500">(You)</span>}
+                        </div>
+                      </div>
+                      <div className="col-span-4 flex items-center justify-end font-bold">
+                        {entry.score}
+                      </div>
+                    </motion.div>
+                  );
+                })
+              )}
             </div>
-          ) : (
-            <div 
-              className={`p-8 rounded-lg text-center transition-colors duration-300 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}
-            >
-              <p className="text-lg">No scores yet. Be the first to play and get on the leaderboard!</p>
-            </div>
-          )}
+          </div>
         </div>
       </div>
 
@@ -765,7 +898,7 @@ const Home: React.FC<HomeProps> = ({
             <h2 
               className="text-3xl font-bold mb-6 text-center"
             >
-              Join <span className={colors.accent}>Trivia.AI</span>
+              Join <span className={colors.accent}>trivia.ai</span>
             </h2>
             
             <p 
@@ -852,7 +985,7 @@ const Home: React.FC<HomeProps> = ({
       {/* Footer */}
       <footer className={`py-8 px-4 transition-colors duration-300 ${darkMode ? 'bg-gray-900 text-gray-400' : 'bg-gray-100 text-gray-600'}`}>
         <div className="max-w-4xl mx-auto text-center">
-          <p>© 2023 Trivia.AI - All rights reserved</p>
+          <p>© 2025 trivia.ai - All rights reserved</p>
           <p className="mt-2 text-sm">
             <Link href="/privacy" className={`hover:${colors.accent} transition-colors duration-300`}>Privacy Policy</Link>
             {' • '}

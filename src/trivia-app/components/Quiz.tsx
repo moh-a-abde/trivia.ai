@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { FaCheck, FaTimes, FaArrowRight, FaRedo, FaHome, FaRegClock, FaFire, FaRegLightbulb } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaArrowRight, FaRedo, FaHome, FaRegClock, FaFire, FaRegLightbulb, FaBasketballBall, FaFutbol } from 'react-icons/fa';
 import { useUserPreferences } from '../../lib/contexts/UserPreferencesContext';
 import { useAchievementsContext } from '../../lib/contexts/AchievementsContext';
 import confetti from 'canvas-confetti';
@@ -560,10 +560,27 @@ const Quiz: React.FC<QuizProps> = ({ onRestart, darkMode = false, initialQuestio
 
   if (isLoading || selectedQuestions.length === 0) {
     return (
-      <div className={`max-w-2xl mx-auto p-6 rounded-lg shadow-md transition-colors duration-300 ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-black'}`}>
-        <div className="flex flex-col items-center justify-center py-12">
-          <div className={`w-16 h-16 border-4 ${sport === 'basketball' ? 'border-orange-500' : 'border-green-500'} border-t-transparent rounded-full animate-spin mb-4`}></div>
-          <p className="text-lg font-medium">Loading quiz questions...</p>
+      <div className={`max-w-2xl mx-auto p-8 rounded-lg shadow-md transition-colors duration-300 ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-black'}`}>
+        <div className="flex flex-col items-center justify-center py-16">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="flex flex-col items-center"
+          >
+            <div className={`relative w-20 h-20 mb-6`}>
+              <div className={`absolute inset-0 rounded-full border-4 ${sport === 'basketball' ? 'border-orange-300' : 'border-green-300'} opacity-30`}></div>
+              <div className={`absolute inset-0 rounded-full border-t-4 border-r-4 ${sport === 'basketball' ? 'border-orange-500' : 'border-green-500'} animate-spin`}></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                {sport === 'basketball' ? 
+                  <FaBasketballBall className="text-orange-500 text-2xl animate-pulse" /> : 
+                  <FaFutbol className="text-green-500 text-2xl animate-pulse" />
+                }
+              </div>
+            </div>
+            <h2 className="text-xl font-bold mb-3">Loading Quiz</h2>
+            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Preparing challenging questions for you...</p>
+          </motion.div>
         </div>
       </div>
     );
@@ -964,21 +981,33 @@ const Quiz: React.FC<QuizProps> = ({ onRestart, darkMode = false, initialQuestio
       {renderPerfectScoreAnimation()}
       
       {/* Header with Timer and Settings */}
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center flex-1">
-          <FaRegClock className={`mr-2 ${timeLeft < 10 ? 'text-red-500' : 'text-gray-500'}`} />
-          <div className="w-full bg-gray-200 rounded-full h-4 dark:bg-gray-700">
-            <div
-              className={`h-4 rounded-full ${
-                timeLeft > 20 ? 'bg-green-500' : timeLeft > 10 ? 'bg-yellow-500' : 'bg-red-500'
-              }`}
-              style={{ width: `${(timeLeft / 30) * 100}%` }}
-            ></div>
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex-1 mr-4">
+          <div className="flex items-center mb-1 justify-between">
+            <div className="flex items-center">
+              <FaRegClock className={`mr-2 ${timeLeft < 10 ? 'text-red-500 animate-pulse' : 'text-gray-500'}`} />
+              <span className={`font-medium ${timeLeft < 10 ? 'text-red-500' : ''}`}>Time Remaining</span>
+            </div>
+            <span className={`font-bold text-lg ${
+              timeLeft > 20 ? 'text-green-500' : 
+              timeLeft > 10 ? 'text-yellow-500' : 
+              'text-red-500 animate-pulse'
+            }`}>{timeLeft}s</span>
           </div>
-          <span className={`ml-2 font-bold ${timeLeft < 10 ? 'text-red-500' : ''}`}>{timeLeft}s</span>
+          <div className="w-full bg-gray-200 rounded-full h-3 dark:bg-gray-700 overflow-hidden">
+            <motion.div
+              initial={{ width: "100%" }}
+              animate={{ 
+                width: `${(timeLeft / 30) * 100}%`,
+                backgroundColor: timeLeft > 20 ? "#10b981" : timeLeft > 10 ? "#f59e0b" : "#ef4444"
+              }}
+              transition={{ duration: 0.3 }}
+              className={`h-3 rounded-full`}
+            ></motion.div>
+          </div>
         </div>
         
-        <div className="flex items-center ml-4">
+        <div className="flex items-center">
           {/* Hint System Button */}
           <HintSystem
             question={selectedQuestions[currentQuestion]?.question || ''}
@@ -990,69 +1019,107 @@ const Quiz: React.FC<QuizProps> = ({ onRestart, darkMode = false, initialQuestio
           />
           
           {/* Settings Button */}
-          <button
+          <motion.button
             onClick={() => {
               // Pause the timer when settings are opened
               pauseTimer();
               setShowPreferences(true);
             }}
             className={`ml-2 flex items-center justify-center p-2 rounded-full ${
-              darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'
-            } hover:bg-opacity-80`}
+              darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            } transition-all duration-200`}
             aria-label="Settings"
+            whileHover={{ scale: 1.1, rotate: 90 }}
+            whileTap={{ scale: 0.9 }}
           >
             <FaCog size={20} />
-          </button>
+          </motion.button>
         </div>
       </div>
       
       {/* Hint Display */}
       {hint && (
-        <div className="mb-6 p-4 rounded-lg bg-amber-50 border border-amber-200">
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          className="mb-6 p-4 rounded-lg bg-gradient-to-r from-amber-50 to-amber-100 border-l-4 border-amber-400 shadow-md"
+        >
           <div className="flex items-center">
-            <div className="bg-amber-200 p-2 rounded-full mr-3">
-              <FaRegLightbulb className="text-amber-600" />
+            <div className="bg-amber-200 p-2 rounded-full mr-3 shadow-inner">
+              <FaRegLightbulb className="text-amber-600 text-lg" />
             </div>
             <div>
-              <div className="font-bold text-sm uppercase text-amber-800">
+              <div className="font-bold text-sm uppercase text-amber-800 tracking-wide">
                 HINT
               </div>
-              <div className="text-amber-800">
+              <div className="text-amber-800 font-medium">
                 {hint}
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
       
       {/* Progress Bar */}
-      <div className="mb-6">
-        <div className="flex justify-between text-sm mb-1">
-          <span>Question {currentQuestion + 1} of {selectedQuestions.length}</span>
-          <span>Score: {score}/{selectedQuestions.length}</span>
+      <div className="mb-8">
+        <div className="flex justify-between text-sm mb-2">
+          <div className="flex items-center">
+            <span className="font-medium">Question </span>
+            <span className={`ml-1 font-bold ${colors.accent}`}>{currentQuestion + 1}</span>
+            <span className="mx-1 font-medium">of</span>
+            <span className="font-bold">{selectedQuestions.length}</span>
+          </div>
+          <div className="flex items-center">
+            <span className="font-medium">Score: </span>
+            <span className={`ml-1 font-bold ${score > 0 ? 'text-green-500' : ''}`}>{score}</span>
+            <span className="mx-1 font-medium">/</span>
+            <span className="font-bold">{selectedQuestions.length}</span>
+          </div>
         </div>
-        <div className={`bg-gray-200 rounded-full h-2.5 dark:bg-gray-700`}>
-          <div
-            className={`${colors.progressBar} h-2.5 rounded-full`}
-            style={{ width: `${((currentQuestion) / selectedQuestions.length) * 100}%` }}
-          ></div>
+        <div className={`bg-gray-200 rounded-full h-3 dark:bg-gray-700 overflow-hidden relative`}>
+          <motion.div
+            initial={{ width: "0%" }}
+            animate={{ width: `${((currentQuestion) / selectedQuestions.length) * 100}%` }}
+            transition={{ 
+              duration: 0.5, 
+              ease: "easeOut"
+            }}
+            className={`${colors.progressBar} h-full rounded-full relative`}
+          >
+            {currentQuestion > 0 && (
+              <div className="absolute top-0 right-0 w-3 h-3 bg-white rounded-full border-2 border-white shadow-md transform translate-x-1/2 -translate-y-0"></div>
+            )}
+          </motion.div>
         </div>
       </div>
 
       {/* Streak Message */}
       {streak >= 3 && (
-        <div className={`mb-4 p-2 ${
-          sport === 'basketball'
-            ? 'bg-gradient-to-r from-yellow-400 to-orange-500'
-            : 'bg-gradient-to-r from-emerald-400 to-green-500'
-        } text-white font-bold rounded-md text-center relative overflow-hidden`}>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+          className={`mb-6 p-3 ${
+            sport === 'basketball'
+              ? 'bg-gradient-to-r from-yellow-400 to-orange-500'
+              : 'bg-gradient-to-r from-emerald-400 to-green-500'
+          } text-white font-bold rounded-xl text-center relative overflow-hidden shadow-md`}
+        >
           {getStreakMessage()}
+          <div 
+            className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10"
+            style={{
+              backgroundImage: 'url("data:image/svg+xml,%3Csvg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="%23ffffff" fill-opacity="1" fill-rule="evenodd"%3E%3Ccircle cx="3" cy="3" r="3"/%3E%3Ccircle cx="13" cy="13" r="3"/%3E%3C/g%3E%3C/svg%3E")',
+              backgroundSize: '12px 12px'
+            }}
+          />
           {streak >= 5 && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <FaFire className={`text-4xl ${sport === 'basketball' ? 'text-yellow-300' : 'text-emerald-300'}`} />
+            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+              <FaFire className={`text-3xl ${sport === 'basketball' ? 'text-yellow-200' : 'text-emerald-200'} animate-pulse-subtle`} />
             </div>
           )}
-        </div>
+        </motion.div>
       )}
 
       {/* Question Display */}
@@ -1071,48 +1138,67 @@ const Quiz: React.FC<QuizProps> = ({ onRestart, darkMode = false, initialQuestio
         </AnimatePresence>
         
         {/* Answer Options */}
-        <div className="grid grid-cols-1 gap-3">
+        <div className="grid grid-cols-1 gap-4">
           {selectedQuestions[currentQuestion]?.options.map((option, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 1 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ 
-                opacity: showFeedback && option !== selectedQuestions[currentQuestion]?.correctAnswer ? 0.5 : 1,
+                opacity: showFeedback && option !== selectedQuestions[currentQuestion]?.correctAnswer ? 0.7 : 1,
+                y: 0,
                 scale: selectedAnswer === option && isCorrect ? [1, 1.05, 1] : 1,
                 x: selectedAnswer === option && !isCorrect && showFeedback ? [0, -5, 5, -5, 5, 0] : 0
               }}
               transition={{ 
-                duration: 0.5,
+                duration: 0.3,
+                delay: index * 0.1,
                 scale: { duration: 0.3 },
                 x: { duration: 0.5 }
               }}
+              whileHover={!showFeedback ? { scale: 1.02 } : {}}
+              whileTap={!showFeedback ? { scale: 0.98 } : {}}
             >
               <button
                 onClick={() => handleAnswerSelect(option)}
                 disabled={showFeedback}
-                className={`p-4 w-full rounded-lg text-left transition-all duration-200 ${
+                aria-label={`Answer option: ${option}`}
+                aria-pressed={selectedAnswer === option}
+                aria-disabled={showFeedback}
+                className={`p-5 w-full rounded-xl text-left transition-all duration-300 ${
                   selectedAnswer === option
                     ? showFeedback
                       ? option === selectedQuestions[currentQuestion]?.correctAnswer
-                        ? 'bg-green-500 text-white'
-                        : 'bg-red-500 text-white'
+                        ? 'bg-green-500 text-white shadow-md'
+                        : 'bg-red-500 text-white shadow-md'
                       : darkMode
-                      ? `${colors.darkPrimary} text-white`
-                      : `${colors.primary} text-white`
+                      ? `${colors.darkPrimary} text-white shadow-md`
+                      : `${colors.primary} text-white shadow-md`
                     : showFeedback && option === selectedQuestions[currentQuestion]?.correctAnswer
-                    ? 'bg-green-500 text-white'
+                    ? 'bg-green-500 text-white shadow-md'
                     : darkMode
-                    ? 'bg-gray-700 hover:bg-gray-600 text-white'
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
+                    ? 'bg-gray-700 hover:bg-gray-600 text-white border border-gray-600'
+                    : 'bg-gray-50 hover:bg-gray-100 text-gray-800 border border-gray-200 hover:shadow-md'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span>{option}</span>
+                  <div className="flex items-center">
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center mr-3 text-sm font-medium ${
+                      selectedAnswer === option 
+                        ? 'bg-white bg-opacity-20' 
+                        : darkMode 
+                          ? 'bg-gray-600' 
+                          : 'bg-gray-200'
+                    }`}>
+                      {String.fromCharCode(65 + index)}
+                    </div>
+                    <span className="text-base">{option}</span>
+                  </div>
                   {showFeedback && option === selectedQuestions[currentQuestion]?.correctAnswer && (
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1, rotate: [0, 10, 0] }}
                       transition={{ duration: 0.5 }}
+                      className="bg-white bg-opacity-20 p-1 rounded-full"
                     >
                       <FaCheck className="text-white" />
                     </motion.div>
@@ -1122,6 +1208,7 @@ const Quiz: React.FC<QuizProps> = ({ onRestart, darkMode = false, initialQuestio
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ duration: 0.3 }}
+                      className="bg-white bg-opacity-20 p-1 rounded-full"
                     >
                       <FaTimes className="text-white" />
                     </motion.div>
@@ -1133,31 +1220,35 @@ const Quiz: React.FC<QuizProps> = ({ onRestart, darkMode = false, initialQuestio
         </div>
       </div>
 
-      <div className="flex justify-between">
-        <button
+      <div className="flex justify-between mt-6">
+        <motion.button
           onClick={onRestart}
-          className={`px-6 py-2 rounded-lg font-medium flex items-center transition-colors duration-300 ${
+          className={`px-6 py-3 rounded-lg font-medium flex items-center justify-center transition-all duration-300 ${
             darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
-          }`}
+          } focus:outline-none focus:ring-2 focus:ring-blue-400`}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          aria-label="Return to home screen"
         >
           <FaHome className="mr-2" /> Home
-        </button>
+        </motion.button>
         
-        <button
+        <motion.button
           onClick={() => handleNextQuestion()}
           disabled={selectedAnswer === null || showFeedback}
-          className={`px-6 py-2 rounded-lg font-medium flex items-center transition-colors duration-300 ${
+          className={`px-8 py-3 rounded-lg font-medium flex items-center justify-center transition-all duration-300 ${
             selectedAnswer === null || showFeedback
-              ? darkMode
-                ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              ? 'bg-gray-400 cursor-not-allowed text-white opacity-50'
               : darkMode
-              ? `${colors.darkPrimary} ${colors.darkHover} text-white`
-              : `${colors.primary} ${colors.hover} text-white`
-          }`}
+                ? `${colors.buttonDark} text-white`
+                : `${colors.buttonLight} text-white`
+          } focus:outline-none focus:ring-2 focus:ring-blue-400`}
+          whileHover={selectedAnswer !== null && !showFeedback ? { scale: 1.05 } : {}}
+          whileTap={selectedAnswer !== null && !showFeedback ? { scale: 0.95 } : {}}
+          aria-label="Submit answer and continue to next question"
         >
-          Next <FaArrowRight className="ml-2" />
-        </button>
+          {showFeedback ? 'Next' : 'Submit'} <FaArrowRight className="ml-2" />
+        </motion.button>
       </div>
 
       <div className="mt-4 text-lg font-semibold flex justify-between">

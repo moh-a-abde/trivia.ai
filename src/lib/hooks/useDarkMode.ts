@@ -41,6 +41,15 @@ export function useDarkMode(): UseDarkModeReturn {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
+  // Apply or remove dark class on the html element when darkMode changes
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
+
   // Function to toggle dark mode
   const toggleDarkMode = () => {
     const newMode = !darkMode;

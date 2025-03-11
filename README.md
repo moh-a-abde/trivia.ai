@@ -2,7 +2,7 @@
 
 ## 🚀 Project Overview
 
-Trivia.AI is an advanced, interactive sports trivia application designed to provide users with an engaging and personalized quiz experience focused on **basketball** 🏀 and **soccer** ⚽. The platform combines rich trivia content with modern web technologies to create an **immersive learning environment** for sports enthusiasts. 🎯🔥
+trivia.ai is an advanced, interactive sports trivia application designed to provide users with an engaging and personalized quiz experience focused on **basketball** 🏀 and **soccer** ⚽. The platform combines rich trivia content with modern web technologies to create an **immersive learning environment** for sports enthusiasts. 🎯🔥
 
 ## 🎯 Core Purpose
 
@@ -46,7 +46,7 @@ The primary aim of trivia.ai is to deliver a **comprehensive sports knowledge pl
 
 ## 🛠️ Technical Implementation
 
-Trivia.AI is built using **modern web technologies**:
+trivia.ai is built using **modern web technologies**:
 
 - **🌐 Frontend**: Next.js 14 with App Router, React, TypeScript, and Tailwind CSS.
 - **🔒 Authentication**: Firebase Authentication.
@@ -58,7 +58,7 @@ Trivia.AI is built using **modern web technologies**:
 
 ## 📖 Educational Value
 
-Beyond entertainment, Trivia.AI serves as an **educational tool** that:
+Beyond entertainment, trivia.ai serves as an **educational tool** that:
 
 - 📜 Expands users' knowledge of **sports history and current events**.
 - 🎯 Encourages **continuous learning** through daily challenges.
@@ -69,7 +69,7 @@ Beyond entertainment, Trivia.AI serves as an **educational tool** that:
 
 ## 🌟 Future Vision
 
-Trivia.AI aims to become the **premier platform for sports knowledge enhancement**, with plans to:
+trivia.ai aims to become the **premier platform for sports knowledge enhancement**, with plans to:
 
 - **🏏 Expand to additional sports** beyond basketball and soccer.
 - **🗣️ Implement more social features** to foster community interaction.
@@ -77,5 +77,5 @@ Trivia.AI aims to become the **premier platform for sports knowledge enhancement
 
 ---
 
-🎉 **Trivia.AI: Where Sports Knowledge Meets Interactive Learning!** 🚀🔥
+🎉 **trivia.ai: Where Sports Knowledge Meets Interactive Learning!** 🚀🔥
 
