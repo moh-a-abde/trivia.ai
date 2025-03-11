@@ -2,39 +2,69 @@
 
 ## Demo
 
-Landing Page Not Signed In
-![Screenshot 4](demo/home_soccer_light.png)
-![Screenshot 3](demo/home_soccer_dark.png)
----
-Sing In/Sign Up
-![Screenshot 9](demo/signin.png)
-![Screenshot 11](demo/signup.png)
----
-Loading Animation
-card
+### Landing Page (Not Signed In)
+<p align="center">
+    <img src="demo/home_soccer_light.png" width="45%">
+    <img src="demo/home_soccer_dark.png" width="45%">
+</p>
 
-![Screenshot 7](demo/loading.png)
 ---
-Correct Answer
-![Screenshot 1](demo/correct_answer.png)
----
-Leaderboard
-![Screenshot 6](demo/leadboard.png)
----
-Incorrect Answer
-![Screenshot 5](demo/incorrect.png)
----
-Hint
-![Screenshot 10](demo/soccer_hint_light.png)
-![Screenshot 2](demo/hint.png)
----
-3 in a row streak
-![Screenshot 12](demo/streak.png)
----
-End Quiz Not Signed In
-![Screenshot 8](demo/signed_out_qiuz.png)
 
+### Sign In / Sign Up
+<p align="center">
+    <img src="demo/signin.png" width="45%">
+    <img src="demo/signup.png" width="45%">
+</p>
 
+---
+
+### Loading Animation
+<p align="center">
+    <img src="demo/loading.png" width="30%">
+</p>
+
+---
+
+### Correct Answer
+<p align="center">
+    <img src="demo/correct_answer.png" width="30%">
+</p>
+
+---
+
+### Leaderboard
+<p align="center">
+    <img src="demo/leadboard.png" width="30%">
+</p>
+
+---
+
+### Incorrect Answer
+<p align="center">
+    <img src="demo/incorrect.png" width="30%">
+</p>
+
+---
+
+### Hint
+<p align="center">
+    <img src="demo/soccer_hint_light.png" width="45%">
+    <img src="demo/hint.png" width="45%">
+</p>
+
+---
+
+### 3 in a Row Streak
+<p align="center">
+    <img src="demo/streak.png" width="30%">
+</p>
+
+---
+
+### End Quiz (Not Signed In)
+<p align="center">
+    <img src="demo/signed_out_qiuz.png" width="30%">
+</p>
 
 ## 🚀 Project Overview
 
