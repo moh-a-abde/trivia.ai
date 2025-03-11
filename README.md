@@ -2,7 +2,7 @@
 
 ## Demo
 
-Landing Page Signed In
+Landing Page Not Signed In
 ![Screenshot 4](demo/home_soccer_light.png)
 ![Screenshot 3](demo/home_soccer_dark.png)
 
