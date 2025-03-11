@@ -1,8 +1,43 @@
-# 🎉 trivia.ai: Interactive Sports Trivia Platform 🏀⚽
+# trivia.ai: Interactive Sports Trivia Platform 🏀⚽
+
+## Demo
+
+Landing Page Signed In
+![Screenshot 4](demo/home_soccer_light.png)
+![Screenshot 3](demo/home_soccer_dark.png)
+
+Sing In/Sign Up
+![Screenshot 9](demo/signin.png)
+![Screenshot 11](demo/signup.png)
+
+Loading Animation
+![Screenshot 7](demo/loading.png)
+
+Correct Answer
+![Screenshot 1](demo/correct_answer.png)
+
+Leaderboard
+![Screenshot 6](demo/leadboard.png)
+
+Incorrect Answer
+![Screenshot 5](demo/incorrect.png)
+
+Hint
+![Screenshot 10](demo/soccer_hint_light.png)
+
+![Screenshot 2](demo/hint.png)
+
+3 in a row streak
+![Screenshot 12](demo/streak.png)
+
+End Quiz Not Signed In
+![Screenshot 8](demo/signed_out_qiuz.png)
+
+
 
 ## 🚀 Project Overview
 
-trivia.ai is an advanced, interactive sports trivia application designed to provide users with an engaging and personalized quiz experience focused on **basketball** 🏀 and **soccer** ⚽. The platform combines rich trivia content with modern web technologies to create an **immersive learning environment** for sports enthusiasts. 🎯🔥
+Trivia.AI is an advanced, interactive sports trivia application designed to provide users with an engaging and personalized quiz experience focused on **basketball** 🏀 and **soccer** ⚽. The platform combines rich trivia content with modern web technologies to create an **immersive learning environment** for sports enthusiasts. 🎯🔥
 
 ## 🎯 Core Purpose
 
@@ -46,7 +81,7 @@ The primary aim of trivia.ai is to deliver a **comprehensive sports knowledge pl
 
 ## 🛠️ Technical Implementation
 
-trivia.ai is built using **modern web technologies**:
+Trivia.AI is built using **modern web technologies**:
 
 - **🌐 Frontend**: Next.js 14 with App Router, React, TypeScript, and Tailwind CSS.
 - **🔒 Authentication**: Firebase Authentication.
@@ -58,7 +93,7 @@ trivia.ai is built using **modern web technologies**:
 
 ## 📖 Educational Value
 
-Beyond entertainment, trivia.ai serves as an **educational tool** that:
+Beyond entertainment, Trivia.AI serves as an **educational tool** that:
 
 - 📜 Expands users' knowledge of **sports history and current events**.
 - 🎯 Encourages **continuous learning** through daily challenges.
@@ -69,7 +104,7 @@ Beyond entertainment, trivia.ai serves as an **educational tool** that:
 
 ## 🌟 Future Vision
 
-trivia.ai aims to become the **premier platform for sports knowledge enhancement**, with plans to:
+Trivia.AI aims to become the **premier platform for sports knowledge enhancement**, with plans to:
 
 - **🏏 Expand to additional sports** beyond basketball and soccer.
 - **🗣️ Implement more social features** to foster community interaction.
@@ -77,5 +112,5 @@ trivia.ai aims to become the **premier platform for sports knowledge enhancement
 
 ---
 
-🎉 **trivia.ai: Where Sports Knowledge Meets Interactive Learning!** 🚀🔥
+🎉 **Trivia.AI: Where Sports Knowledge Meets Interactive Learning!** 🚀🔥
 
